@@ -107,13 +107,23 @@ function OutputFiles = Run(sProcess, sInputs) %#ok<DEFNU>
         weight_channels = region_weight (region_weight > 0) ./ sum(region_weight);
 
         idx_chann = channel_find( sChannels_data.Channel, cellfun(@(x)[ x hb_type{1}], channels_name , 'UniformOutput', false));
-        T_Hbo{:,iRegion} = mean( weight_channels' .* sDataNIRS(:,idx_chann),2);
+        [C, ia,ib] = intersect( cellfun(@(x)[ x hb_type{1}], channels_name , 'UniformOutput', false)  , {sChannels_data.Channel(idx_chann).Name});
+
+        if ~isempty(ia)
+            T_Hbo{:,iRegion} = mean( weight_channels(ia)' .* sDataNIRS(:,idx_chann),2);
+        end
 
         idx_chann = channel_find( sChannels_data.Channel, cellfun(@(x)[ x hb_type{2}], channels_name , 'UniformOutput', false));
-        T_HbR{:,iRegion} = mean( weight_channels' .* sDataNIRS(:,idx_chann),2);
+        [C, ia,ib] = intersect( cellfun(@(x)[ x hb_type{1}], channels_name , 'UniformOutput', false)  , {sChannels_data.Channel(idx_chann).Name});
+        if ~isempty(ia)
+            T_HbR{:,iRegion} = mean( weight_channels(ia)' .* sDataNIRS(:,idx_chann),2);
+        end
 
-        idx_chann = channel_find( sChannels_data.Channel, cellfun(@(x)[ x hb_type{3}], channels_name , 'UniformOutput', false));
-        T_HbT{:,iRegion} = mean( weight_channels' .* sDataNIRS(:,idx_chann),2);
+        idx_chann = channel_find( sChannels_data.Channel, cellfun(@(x)[ x hb_type{3}], channels_name , 'UniformOutput', false));        
+        [C, ia,ib] = intersect( cellfun(@(x)[ x hb_type{1}], channels_name , 'UniformOutput', false)  , {sChannels_data.Channel(idx_chann).Name});
+        if ~isempty(ia)
+            T_HbT{:,iRegion} = mean( weight_channels(ia)' .* sDataNIRS(:,idx_chann),2);
+        end
     end
     
     
