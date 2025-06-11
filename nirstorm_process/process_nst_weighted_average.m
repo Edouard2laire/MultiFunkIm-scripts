@@ -95,6 +95,9 @@ function OutputFiles = Run(sProcess, sInputs) %#ok<DEFNU>
     T_HbT = table('Size',sz,'VariableTypes',varTypes,'VariableNames',varNames);
     T_HbT.Time = sData.Time';
 
+    isExported = [ 0 0 0];
+
+
     for iRegion = 2:size(weight_matrix,2)
         region_weight = weight_matrix{:, iRegion};
         channels_name = weight_matrix{region_weight > 0 , 1};
@@ -111,25 +114,35 @@ function OutputFiles = Run(sProcess, sInputs) %#ok<DEFNU>
 
         if ~isempty(ia)
             T_Hbo{:,iRegion} = mean( weight_channels(ia)' .* sDataNIRS(:,idx_chann),2);
+            isExported(1) = 1;
         end
 
         idx_chann = channel_find( sChannels_data.Channel, cellfun(@(x)[ x hb_type{2}], channels_name , 'UniformOutput', false));
-        [C, ia,ib] = intersect( cellfun(@(x)[ x hb_type{1}], channels_name , 'UniformOutput', false)  , {sChannels_data.Channel(idx_chann).Name});
+        [C, ia,ib] = intersect( cellfun(@(x)[ x hb_type{2}], channels_name , 'UniformOutput', false)  , {sChannels_data.Channel(idx_chann).Name});
         if ~isempty(ia)
             T_HbR{:,iRegion} = mean( weight_channels(ia)' .* sDataNIRS(:,idx_chann),2);
+            isExported(2) = 1;
         end
 
         idx_chann = channel_find( sChannels_data.Channel, cellfun(@(x)[ x hb_type{3}], channels_name , 'UniformOutput', false));        
-        [C, ia,ib] = intersect( cellfun(@(x)[ x hb_type{1}], channels_name , 'UniformOutput', false)  , {sChannels_data.Channel(idx_chann).Name});
+        [C, ia,ib] = intersect( cellfun(@(x)[ x hb_type{3}], channels_name , 'UniformOutput', false)  , {sChannels_data.Channel(idx_chann).Name});
         if ~isempty(ia)
             T_HbT{:,iRegion} = mean( weight_channels(ia)' .* sDataNIRS(:,idx_chann),2);
+            isExported(3) = 1;
         end
     end
     
     
     fileName = sProcess.options.outputdir.Value{1};
-    writetable(T_Hbo, strrep(fileName, '.tsv','_HbO.tsv'), 'FileType','text');
-    writetable(T_HbR, strrep(fileName, '.tsv','_HbR.tsv'), 'FileType','text');
-    writetable(T_HbT, strrep(fileName, '.tsv','_HbT.tsv'), 'FileType','text');
+    if isExported(1)
+        writetable(T_Hbo, strrep(fileName, '.tsv','_HbO.tsv'), 'FileType','text');
+    end
+    
+    if isExported(2)
+        writetable(T_HbR, strrep(fileName, '.tsv','_HbR.tsv'), 'FileType','text');
+    end
 
+    if isExported(3)
+        writetable(T_HbT, strrep(fileName, '.tsv','_HbT.tsv'), 'FileType','text');
+    end
 end
