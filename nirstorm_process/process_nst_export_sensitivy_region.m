@@ -106,23 +106,24 @@ function OutputFiles = Run(sProcess, sInputs) %#ok<DEFNU>
     
     T = table('Size',sz,'VariableTypes',varTypes,'VariableNames',varNames);
     
-    iRow = 1;
+    channels_names = {sChannel(strcmp(groups, unique_group{1})).Name};
+    channels_names = cellfun(@(x)strrep(x, unique_group{1}, ''), channels_names, 'UniformOutput', false);
+
     for iPair = 1:nChannel
 
         gain_channel = squeeze(gain_matrix(iPair,:)); 
         gain_channel(gain_channel <  10^(threshold_value)*max_gain) = 0;
         
-        assert(any(gain_channel < 0), 'Found channel with negative gain.')
+        assert(all(gain_channel >= 0), 'Found channel with negative gain.')
 
         for iCluster = 1:length(iRois)
             sROI = sCortex.Atlas(iAtlas).Scouts(iRois(iCluster));
             vertex = sROI.Vertices;
 
-            T{iRow, sROI.Label} = sum(gain_channel(vertex));
+            T{iPair, sROI.Label} = sum(gain_channel(vertex));
         end
-
-        T{iRow,'Channel'} = sForward.pair_names(iPair);
-        iRow = iRow + 1;
+        
+        T{iPair,'Channel'} = channels_names(iPair);
     end
     
     
